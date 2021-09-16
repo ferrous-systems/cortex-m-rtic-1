@@ -2,22 +2,22 @@
 
 Within the `app` module the attribute expects to find an initialization
 function marked with the `init` attribute. This function must have
-signature `fn(init::Context) -> (init::LateResources, init::Monotonics)`.
+signature `fn(init::Context) -> (Shared, Local, init::Monotonics)`, where `Shared` and `Local` are
+the resource structures defined by the user.
 
 This initialization function will be the first part of the application to run.
 The `init` function will run *with interrupts disabled* and has exclusive access
-to Cortex-M where the `bare_metal::CriticalSection` token is available as `cs`.
-And optionally, device specific peripherals through the `core` and `device` fields
-of `init::Context`.
+to Cortex-M where the `bare_metal::CriticalSection` token is available as `cs`, while
+device specific peripherals are available through the `core` and `device` fields of `init::Context`.
 
-`static mut` variables declared at the beginning of `init` will be transformed
-into `&'static mut` references that are safe to access. Notice, this feature may be deprecated in next release, see `task_local` resources.
 
-[`rtic::Peripherals`]: ../../api/rtic/struct.Peripherals.html
+## Example
 
 The example below shows the types of the `core`, `device` and `cs` fields, and
-showcases safe access to a `static mut` variable. The `device` field is only
-available when the `peripherals` argument is set to `true` (default). In the rare case you want to implement an ultra-slim application you can explicitly set `peripherals` to `false`.
+showcases safe creation of variables with `'static` lifetimes which is possible in `init`.
+The `device` field is only
+available when the `peripherals` argument is set to `true` (which is the default). In the rare case
+you want to implement an ultra-slim application you can explicitly set `peripherals` to `false`.
 
 ``` rust
 {{#include ../../../../examples/init.rs}}
